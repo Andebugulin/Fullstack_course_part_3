@@ -26,11 +26,18 @@ let persons = [
     }
 ]
 const generateId = () => {
-    const maxId = persons.length > 0
-      ? Math.max(...persons.map(n => n.id))
-      : 0
-    return maxId + 1
-  }
+    const minRange = 1;
+    const maxRange = 100000000; 
+
+    let randomId;
+
+    do {
+        randomId = Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
+    } while (persons.some(person => person.id === randomId));
+
+    return randomId;
+};
+
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
@@ -62,16 +69,20 @@ app.get('/info', (req, res) => {
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  if (!body.content) {
+  if (!body.name || !body.number) {
     return response.status(400).json({ 
-      error: 'content missing' 
+      error: 'name or number missing' 
     })
   }
+  if (persons.some(person => person.name === body.name)) {
+    return response.status(400).json({
+        error: 'name already in use'
+    })
+}
 
   const person = {
-    content: body.content,
-    important: body.important || false,
-    date: new Date(),
+    name: body.name,
+    number: body.number,
     id: generateId(),
   }
 
