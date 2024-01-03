@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "backend for exercises of part3, fullstack course",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andebugulin/exercises_fullstackopen_3.git"
+  },
+  "author": "Andrei Gulin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Andebugulin/exercises_fullstackopen_3/issues"
+  },
+  "homepage": "https://github.com/Andebugulin/exercises_fullstackopen_3#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
