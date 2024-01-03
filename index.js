@@ -25,6 +25,12 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
+const generateId = () => {
+    const maxId = persons.length > 0
+      ? Math.max(...persons.map(n => n.id))
+      : 0
+    return maxId + 1
+  }
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
@@ -33,13 +39,6 @@ app.get('/', (req, res) => {
 app.get('/api/persons', (req, res) => {
   res.json(persons)
 })
-
-const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(n => n.id))
-    : 0
-  return maxId + 1
-}
 
 app.get('/info', (req, res) => {
     const amount_of_people = persons.length;
