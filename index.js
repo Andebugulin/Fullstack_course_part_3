@@ -1,7 +1,11 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const morgan = require('morgan');
+const app = express();
 
-app.use(express.json())
+app.use(express.json());
+
+// Use morgan middleware with 'tiny' configuration for logging
+app.use(morgan('tiny'));
 
 let persons = [
     { 
