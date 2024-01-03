@@ -7,6 +7,16 @@ app.use(express.json());
 // Use morgan middleware with 'tiny' configuration for logging
 app.use(morgan('tiny'));
 
+morgan.token('postData', (req) => {
+    if (req.method === 'POST') {
+      return JSON.stringify(req.body);
+    }
+    return '-';
+  });
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postData'));
+
+  
 let persons = [
     { 
       "id": 1,
