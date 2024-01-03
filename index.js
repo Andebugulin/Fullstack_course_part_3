@@ -41,6 +41,25 @@ const generateId = () => {
   return maxId + 1
 }
 
+app.get('/info', (req, res) => {
+    const amount_of_people = persons.length;
+    const currentTime = new Date().toLocaleTimeString(); // Get current time
+
+    const message = `
+        <div>
+            <p>
+                Phonebook has info for ${amount_of_people} people
+            </p>
+            <p>
+                Request received at: ${currentTime}
+            </p>
+        </div>
+    `;
+  
+    res.send(message);
+});
+
+
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
