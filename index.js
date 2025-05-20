@@ -1,8 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const app = express();
 
 app.use(express.json());
+app.use(cors())
 
 // Use morgan middleware with 'tiny' configuration for logging
 app.use(morgan('tiny'));
