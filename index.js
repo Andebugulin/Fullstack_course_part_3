@@ -1,6 +1,13 @@
 const express = require('express');
 const morgan = require('morgan');
 const app = express();
+const mongoose = require('mongoose');
+require('dotenv').config();
+const cors = require('cors');
+app.use(cors());
+
+const Contact = require('./models/contact');
+
 
 app.use(express.json());
 app.use(express.static('dist'));
@@ -17,53 +24,21 @@ morgan.token('postData', (req) => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postData'));
 
-  
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-const generateId = () => {
-    const minRange = 1;
-    const maxRange = 100000000; 
-
-    let randomId;
-
-    do {
-        randomId = Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
-    } while (persons.some(person => person.id === randomId));
-
-    return randomId;
-};
-
-
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Contact.find({}).then(contacts => {
+    res.json(contacts);
+  }).catch(error => {
+    console.error('Error fetching contacts:', error.message);
+    res.status(500).send('Internal Server Error');
+  });
 })
 
 app.get('/info', (req, res) => {
-    const amount_of_people = persons.length;
+    const amount_of_people = Contact.length; // Get the number of people in the phonebook
     const currentTime = new Date().toLocaleTimeString(); // Get current time
 
     const message = `
@@ -89,40 +64,48 @@ app.post('/api/persons', (request, response) => {
       error: 'name or number missing' 
     })
   }
-  if (persons.some(person => person.name === body.name)) {
-    return response.status(400).json({
-        error: 'name already in use'
-    })
-}
 
-  const person = {
+
+  const person = new Contact({
     name: body.name,
     number: body.number,
-    id: generateId(),
+  });
+  person.save()
+      .then(savedPerson => {
+        response.json(savedPerson);
+      })
+      .catch(error => {
+        console.error('Error saving contact:', error.message);
+        response.status(500).send('Internal Server Error');
+      });
   }
-
-  persons = persons.concat(person)
-
-  response.json(person)
-})
+);
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
+  const id = request.params.id
+  Contact.findById(id).then(person => {
+    if (person) {
+      response.json(person)
+    } else {
+      response.status(404).end()
+    }
   }
+  ).catch(error => {
+    console.error('Error fetching contact:', error.message);
+    response.status(500).send('Internal Server Error');
+  });
 
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
-
-  response.status(204).end()
+  Contact.findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => {
+      console.error('Error deleting contact:', error.message)
+      response.status(500).send('Internal Server Error')
+    })
 })
 
 const PORT = process.env.PORT || 3001
