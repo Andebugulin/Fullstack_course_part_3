@@ -41,6 +41,7 @@ app.get('/info', (req, res) => {
     const amount_of_people = Contact.length; // Get the number of people in the phonebook
     const currentTime = new Date().toLocaleTimeString(); // Get current time
 
+    
     const message = `
         <div>
             <p>
