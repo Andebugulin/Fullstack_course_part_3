@@ -24,7 +24,7 @@ morgan.token('postData', (req) => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postData'));
 
-app.get('/', (req, res) => {
+app.get('/', (req, res, next) => {
   res.send('<h1>Hello World!</h1>')
 })
 
@@ -33,8 +33,9 @@ app.get('/api/persons', (req, res) => {
     res.json(contacts);
   }).catch(error => {
     console.error('Error fetching contacts:', error.message);
-    res.status(500).send('Internal Server Error');
-  });
+    next(error);
+  }
+  );
 })
 
 app.get('/info', (req, res) => {
@@ -57,7 +58,7 @@ app.get('/info', (req, res) => {
 });
 
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -77,12 +78,12 @@ app.post('/api/persons', (request, response) => {
       })
       .catch(error => {
         console.error('Error saving contact:', error.message);
-        response.status(500).send('Internal Server Error');
+      next(error);
       });
   }
 );
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
   Contact.findById(id).then(person => {
     if (person) {
@@ -91,23 +92,64 @@ app.get('/api/persons/:id', (request, response) => {
       response.status(404).end()
     }
   }
-  ).catch(error => {
-    console.error('Error fetching contact:', error.message);
-    response.status(500).send('Internal Server Error');
-  });
-
+  ).catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Contact.findByIdAndDelete(request.params.id)
     .then(result => {
       response.status(204).end()
     })
     .catch(error => {
       console.error('Error deleting contact:', error.message)
-      response.status(500).send('Internal Server Error')
+      next(error)
     })
 })
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const { name, number } = request.body
+  const id = request.params.id
+  const updatedContact = {
+    name,
+    number
+  }
+  Contact.findByIdAndUpdate(id, updatedContact, { new: true })
+    .then(updatedPerson => {
+      if (updatedPerson) {
+        response.json(updatedPerson)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => {
+      console.error('Error updating contact:', error.message)
+      next(error)
+    })
+}
+)
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint)
+
+
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler)
+
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
