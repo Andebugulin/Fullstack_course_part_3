@@ -3,8 +3,6 @@ const morgan = require('morgan');
 const app = express();
 const mongoose = require('mongoose');
 require('dotenv').config();
-const cors = require('cors');
-app.use(cors());
 
 const Contact = require('./models/contact');
 
