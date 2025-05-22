@@ -1,47 +1,45 @@
-const express = require('express');
-const morgan = require('morgan');
-const app = express();
-const mongoose = require('mongoose');
-require('dotenv').config();
+const express = require('express')
+const morgan = require('morgan')
+const app = express()
+require('dotenv').config()
 
-const Contact = require('./models/contact');
+const Contact = require('./models/contact')
 
 
-app.use(express.json());
-app.use(express.static('dist'));
+app.use(express.json())
+app.use(express.static('dist'))
 
 // Use morgan middleware with 'tiny' configuration for logging
-app.use(morgan('tiny'));
+app.use(morgan('tiny'))
 
 morgan.token('postData', (req) => {
-    if (req.method === 'POST') {
-      return JSON.stringify(req.body);
-    }
-    return '-';
-  });
+  if (req.method === 'POST') {
+    return JSON.stringify(req.body)
+  }
+  return '-'
+})
 
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postData'));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postData'))
 
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
   Contact.find({}).then(contacts => {
-    res.json(contacts);
+    res.json(contacts)
   }).catch(error => {
-    console.error('Error fetching contacts:', error.message);
-    next(error);
+    console.error('Error fetching contacts:', error.message)
+    next(error)
   }
-  );
+  )
 })
 
 app.get('/info', (req, res) => {
-    const amount_of_people = Contact.length; // Get the number of people in the phonebook
-    const currentTime = new Date().toLocaleTimeString(); // Get current time
+  const amount_of_people = Contact.length // Get the number of people in the phonebook
+  const currentTime = new Date().toLocaleTimeString() // Get current time
 
-    
-    const message = `
+  const message = `
         <div>
             <p>
                 Phonebook has info for ${amount_of_people} people
@@ -50,10 +48,9 @@ app.get('/info', (req, res) => {
                 Request received at: ${currentTime}
             </p>
         </div>
-    `;
-  
-    res.send(message);
-});
+    `
+  res.send(message)
+})
 
 
 app.post('/api/persons', (request, response, next) => {
@@ -62,17 +59,17 @@ app.post('/api/persons', (request, response, next) => {
   const person = new Contact({
     name: body.name,
     number: body.number,
-  });
+  })
   person.save()
-      .then(savedPerson => {
-        response.json(savedPerson);
-      })
-      .catch(error => {
-        console.error('Error saving contact:', error.message);
-      next(error);
-      });
-  }
-);
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => {
+      console.error('Error saving contact:', error.message)
+      next(error)
+    })
+}
+)
 
 app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
@@ -88,7 +85,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Contact.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => {

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,10 @@
   },
   "homepage": "https://github.com/Andebugulin/exercises_fullstackopen_3#readme",
   "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "eslint": "^9.27.0",
+    "globals": "^16.1.0",
     "nodemon": "^3.0.2"
   },
   "dependencies": {
